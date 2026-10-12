@@ -13,12 +13,14 @@ Features:
 
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from typing import List, Optional
 import math
+import os
 
 app = FastAPI(
-    title="MunafaMandi Decision Engine API",
+    title="MunafaMandi",
     description="Transforms headline mandi prices into personalized net farmer earnings.",
     version="2.0.0"
 )
@@ -163,3 +165,17 @@ async def calculate_net_realization(req: AdvisorRequest):
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "app": "MunafaMandi", "version": "2.0.0"}
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+@app.get("/")
+async def serve_index():
+    return FileResponse(os.path.join(BASE_DIR, "index.html"))
+
+@app.get("/script.js")
+async def serve_script():
+    return FileResponse(os.path.join(BASE_DIR, "script.js"))
+
+@app.get("/manifest.json")
+async def serve_manifest():
+    return FileResponse(os.path.join(BASE_DIR, "manifest.json"))
