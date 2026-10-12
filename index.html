@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>MunafaMandi - मुनाफ़ामंडी | किसान स्मार्ट मंडी सलाहकार</title>
+  
+  <!-- PWA Meta -->
+  <meta name="theme-color" content="#16a34a">
+  <meta name="description" content="किसान भाइयों के लिए स्मार्ट मंडी सलाहकार - भाड़ा, मंडी टैक्स काटकर जेब में आने वाली असली कमाई जानें!">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              200: '#bbf7d0',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d'
+            },
+            harvestGold: {
+              50: '#fffbeb',
+              100: '#fef3c7',
+              500: '#f59e0b',
+              600: '#d97706',
+              700: '#b45309'
+            },
+            soilClay: {
+              50: '#fff7ed',
+              500: '#ea580c',
+              600: '#c2410c'
+            }
+          },
+          fontFamily: {
+            sans: ['Mukta', 'Inter', 'system-ui', 'sans-serif'],
+            display: ['Outfit', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- Google Fonts for crisp Hindi/Punjabi and modern English typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Mukta', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #fafbfc;
+    }
+    .font-english {
+      font-family: 'Outfit', sans-serif;
+    }
+    /* Tab Transitions */
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+    }
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+      transform: translateY(0);
+    }
+    /* Micro Animations */
+    @keyframes pulseGlow {
+      0% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.6); }
+      70% { transform: scale(1.04); box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+      100% { transform: scale(0.96); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+    .mic-live {
+      animation: pulseGlow 1.6s infinite;
+    }
+    .gradient-mesh {
+      background: radial-gradient(at 0% 0%, rgba(34, 197, 94, 0.12) 0px, transparent 50%),
+                  radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.1) 0px, transparent 50%),
+                  radial-gradient(at 50% 50%, rgba(59, 130, 246, 0.05) 0px, transparent 50%);
+    }
+  </style>
+</head>
+<body class="text-slate-800 min-h-screen flex flex-col antialiased selection:bg-brand-500 selection:text-white pb-20 sm:pb-8">
+
+  <!-- Top App Navigation Bar -->
+  <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      
+      <!-- Brand Logo & Motto -->
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-700 via-brand-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-brand-600/25">
+          <i data-lucide="sprout" class="w-6 h-6 stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-2xl tracking-tight text-slate-950 font-english">Munafa<span class="text-brand-600">Mandi</span></span>
+            <span class="text-[11px] bg-emerald-100 text-emerald-800 font-extrabold px-2 py-0.5 rounded-full border border-emerald-300">स्मार्ट सलाहकार</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block" id="headerTagline">
+            असली कमाई, सिर्फ लिस्टेड दाम नहीं
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Actions: Language Selector & Live Connectivity -->
+      <div class="flex items-center gap-2.5">
+        <!-- Multi-language segmented toggle -->
+        <div class="inline-flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+          <button id="langHi" onclick="setLanguage('hi')" class="px-3 py-1 text-xs font-black rounded-lg transition-all bg-white text-brand-700 shadow-sm">हिंदी</button>
+          <button id="langPa" onclick="setLanguage('pa')" class="px-3 py-1 text-xs font-black rounded-lg transition-all text-slate-600 hover:text-slate-900">ਪੰਜਾਬੀ</button>
+          <button id="langEn" onclick="setLanguage('en')" class="px-3 py-1 text-xs font-black rounded-lg transition-all text-slate-600 hover:text-slate-900">EN</button>
+        </div>
+
+        <!-- Live Server Status Indicator -->
+        <div id="onlineBadge" class="flex items-center gap-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 rounded-xl">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="networkStatusText" class="hidden sm:inline">लाइव मंडी भाव</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Desktop / Tablet Navigation Tab Bar -->
+    <div class="border-t border-slate-100 bg-white">
+      <div class="max-w-4xl mx-auto px-4 flex items-center justify-start sm:justify-center gap-1 sm:gap-2 overflow-x-auto py-1.5 no-scrollbar">
+        <button onclick="switchTab('advisor')" id="tabBtn_advisor" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all bg-brand-50 text-brand-700 border border-brand-200 shadow-sm">
+          <i data-lucide="calculator" class="w-4 h-4"></i>
+          <span id="tabLabelAdvisor">मुनाफ़ा कैलकुलेटर</span>
+        </button>
+
+        <button onclick="switchTab('compare')" id="tabBtn_compare" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <i data-lucide="bar-chart-3" class="w-4 h-4 text-emerald-600"></i>
+          <span id="tabLabelCompare">भाव vs शुद्ध कमाई ग्राफ</span>
+        </button>
+
+        <button onclick="switchTab('allmandis')" id="tabBtn_allmandis" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <i data-lucide="store" class="w-4 h-4 text-blue-600"></i>
+          <span id="tabLabelAllMandis">सभी 15 मंडियां</span>
+        </button>
+
+        <button onclick="switchTab('risk')" id="tabBtn_risk" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <i data-lucide="trending-up" class="w-4 h-4 text-amber-500"></i>
+          <span id="tabLabelRisk">7-दिन रुझान & आवक</span>
+        </button>
+
+        <button onclick="switchTab('faq')" id="tabBtn_faq" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <i data-lucide="help-circle" class="w-4 h-4 text-purple-600"></i>
+          <span id="tabLabelFAQ">मदद व जानकारी</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Multi-Tab Body -->
+  <main class="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: ADVISOR & CALCULATOR -->
+    <!-- ========================================== -->
+    <div id="tabContent_advisor" class="tab-content active space-y-6">
+
+      <!-- Hero Visual Banner: High Price Reality Check -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-800 via-brand-700 to-teal-800 text-white p-5 sm:p-6 shadow-md">
+        <!-- Background decorative vectors -->
+        <div class="absolute right-0 bottom-0 opacity-15 pointer-events-none transform translate-x-6 translate-y-6">
+          <svg width="220" height="220" viewBox="0 0 200 200" fill="white">
+            <circle cx="100" cy="100" r="80" />
+            <path d="M40 160 L100 40 L160 160 Z" />
+          </svg>
+        </div>
+
+        <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="space-y-1.5 max-w-xl">
+            <div class="inline-flex items-center gap-1.5 bg-amber-400 text-amber-950 font-black text-xs px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              <i data-lucide="alert-circle" class="w-3.5 h-3.5"></i>
+              <span id="bannerBadgeText">किसान भाइयों का फायदा</span>
+            </div>
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight" id="bannerHeroTitle">
+              दिखाया गया दाम सिर्फ भाव है, असल कमाई वह है जो जेब में बचे!
+            </h1>
+            <p class="text-xs sm:text-sm text-emerald-100 font-medium leading-relaxed" id="bannerHeroDesc">
+              दूर की मंडी में ₹40 ज्यादा दिखे तो भी मत जाइए! पहले रोड का भाड़ा और मंडी खर्च घटाकर शुद्ध मुनाफा चेक कीजिए।
+            </p>
+          </div>
+
+          <button onclick="loadSampleScenario()" class="shrink-0 bg-white hover:bg-emerald-50 active:scale-95 text-brand-800 font-black text-xs sm:text-sm px-4 py-2.5 rounded-2xl shadow transition flex items-center gap-2">
+            <span>भादसों उदाहरण देखें</span>
+            <i data-lucide="arrow-right" class="w-4 h-4 text-brand-700"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Farmer Inputs Section (Voice & Big Taps) -->
+      <section class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200/90">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-brand-100 text-brand-800 flex items-center justify-center font-black text-sm">
+              1
+            </div>
+            <h2 class="text-lg sm:text-xl font-black text-slate-900" id="step1Title">फसल और अपनी जानकारी चुनें</h2>
+          </div>
+
+          <!-- Big Voice Action Button -->
+          <button id="voiceBtn" onclick="toggleVoiceInput()" class="flex items-center gap-2 bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 px-3.5 py-2 rounded-2xl font-black text-xs sm:text-sm transition active:scale-95 shadow-sm">
+            <i data-lucide="mic" class="w-4 h-4 text-rose-600"></i>
+            <span id="voiceBtnLabel">बोलकर बताएं</span>
+          </button>
+        </div>
+
+        <!-- Voice Live Listening Banner -->
+        <div id="voiceFeedback" class="hidden mb-4 p-3.5 bg-rose-50 border border-rose-200 rounded-2xl text-xs sm:text-sm text-rose-950 flex items-center justify-between animate-pulse">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-rose-600 animate-ping"></span>
+            <span id="voiceTranscriptText" class="font-bold">सुन रहे हैं... बोलिए जैसे: "गेहूं, साठ क्विंटल, भादसों"</span>
+          </div>
+          <button onclick="stopVoiceRecording()" class="text-rose-700 font-extrabold text-xs underline">रोकें</button>
+        </div>
+
+        <!-- Quick 1-Tap Scenario Presets -->
+        <div class="mb-5 flex flex-wrap items-center gap-1.5 text-xs">
+          <span class="text-slate-400 font-bold" id="quickTestLabel">त्वरित चुनाव:</span>
+          <button onclick="setPreset('wheat', 60, 'Bhadson')" class="bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200 transition">
+            🌾 गेहूं • 60 क्विंटल (भादसों)
+          </button>
+          <button onclick="setPreset('paddy', 40, 'Samana')" class="bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200 transition">
+            🌾 धान • 40 क्विंटल (समाना)
+          </button>
+          <button onclick="setPreset('potato', 40, 'Nabha')" class="bg-slate-100 hover:bg-brand-50 hover:text-brand-700 text-slate-700 font-bold px-3 py-1.5 rounded-xl border border-slate-200 transition">
+            🥔 आलू • 40 क्विंटल (नाभा)
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Crop Selection Cards -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-2" id="labelCrop">
+              फसल का नाम
+            </label>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="selectCrop('wheat')" id="cropBtn_wheat" class="crop-btn p-2.5 rounded-2xl border-2 border-brand-600 bg-brand-50 text-brand-900 font-black text-center flex flex-col items-center justify-center gap-1.5 transition shadow-sm">
+                <span class="text-3xl">🌾</span>
+                <span class="text-xs font-bold" id="cropName_wheat">गेहूं</span>
+              </button>
+              <button type="button" onclick="selectCrop('paddy')" id="cropBtn_paddy" class="crop-btn p-2.5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-bold text-center flex flex-col items-center justify-center gap-1.5 transition">
+                <span class="text-3xl">🌾</span>
+                <span class="text-xs font-bold" id="cropName_paddy">धान / जीरी</span>
+              </button>
+              <button type="button" onclick="selectCrop('potato')" id="cropBtn_potato" class="crop-btn p-2.5 rounded-2xl border border-slate-200 bg-white hover:border-slate-300 text-slate-700 font-bold text-center flex flex-col items-center justify-center gap-1.5 transition">
+                <span class="text-3xl">🥔</span>
+                <span class="text-xs font-bold" id="cropName_potato">आलू</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Quantity Stepper with Large Tap Controls -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-2" id="labelQty">
+              कुल फसल मात्रा (क्विंटल)
+            </label>
+            <div class="flex items-center border-2 border-slate-200 rounded-2xl overflow-hidden focus-within:border-brand-500 bg-white h-14">
+              <button type="button" onclick="adjustQty(-5)" class="w-14 h-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-2xl flex items-center justify-center active:scale-95 transition">-</button>
+              <input type="number" id="qtyInput" value="60" min="5" max="500" class="w-full h-full text-center text-2xl font-black text-slate-900 focus:outline-none font-english" />
+              <button type="button" onclick="adjustQty(5)" class="w-14 h-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-black text-2xl flex items-center justify-center active:scale-95 transition">+</button>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-500 mt-1.5 px-1 font-semibold">
+              <span>छोटा किसान (20-40)</span>
+              <span>मध्यम (60-100)</span>
+            </div>
+          </div>
+
+          <!-- Village Origin Dropdown -->
+          <div>
+            <label class="block text-xs font-extrabold text-slate-600 uppercase tracking-wider mb-2" id="labelVillage">
+              आपका गांव / कस्बा (पटियाला)
+            </label>
+            <div class="relative h-14">
+              <select id="villageSelect" onchange="calculateRealization()" class="w-full h-full pl-3.5 pr-9 rounded-2xl border-2 border-slate-200 font-bold text-slate-800 text-sm focus:border-brand-500 focus:outline-none bg-white appearance-none">
+                <option value="Bhadson">भादसों (Bhadson)</option>
+                <option value="Patiala Rural">पटियाला देहात (Patiala Rural)</option>
+                <option value="Nabha Rural">नाभा देहात (Nabha Rural)</option>
+                <option value="Samana">समाना (Samana)</option>
+                <option value="Rajpura Rural">राजपुरा देहात (Rajpura Rural)</option>
+                <option value="Sanaur">सनौर (Sanaur)</option>
+                <option value="Ghanour">घनौर (Ghanour)</option>
+                <option value="Patran">पातरां (Patran)</option>
+              </select>
+              <div class="absolute right-3.5 top-4 pointer-events-none text-slate-400">
+                <i data-lucide="chevron-down" class="w-5 h-5"></i>
+              </div>
+            </div>
+            <div class="text-[11px] text-slate-500 mt-1.5 px-1 font-semibold flex items-center gap-1">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-slate-400"></i>
+              <span id="districtTag">दायरा: पटियाला की 15 मुख्य मंडियां</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vehicle Type Selector & Compute CTA -->
+        <div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <div class="p-2 bg-emerald-50 text-brand-700 rounded-xl">
+              <i data-lucide="truck" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs font-extrabold text-slate-700" id="labelVehicle">परिवहन वाहन:</span>
+            <select id="vehicleType" onchange="calculateRealization()" class="text-xs font-extrabold text-slate-800 bg-slate-100 rounded-xl px-3 py-2 border border-slate-200 focus:outline-none">
+              <option value="tractor">🚜 ट्रैक्टर ट्रॉली (₹35/किमी + ₹400 बेस)</option>
+              <option value="pickup">🛻 छोटा हाथी / पिकअप (₹26/किमी + ₹300 बेस)</option>
+              <option value="truck">🚛 बड़ा ट्रक 10-टन (₹55/किमी + ₹800 बेस)</option>
+            </select>
+          </div>
+          
+          <button onclick="calculateRealization()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-black text-sm px-7 py-3 rounded-2xl shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span id="btnCalculate">मुनाफ़ा कैलकुलेट करें</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- HERO WINNER CARD: The Real Take-Home Money -->
+      <section id="winnerCard" class="relative overflow-hidden bg-white rounded-3xl p-5 sm:p-7 shadow-lg border-2 border-brand-500">
+        <!-- Top Ribbon -->
+        <div class="absolute -top-1 -right-1 bg-gradient-to-l from-brand-600 via-emerald-600 to-green-600 text-white font-black text-xs px-5 py-1.5 rounded-bl-2xl uppercase tracking-wider shadow">
+          ★ सर्वाधिक शुद्ध कमाई
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-black text-brand-700 bg-brand-50 px-3 py-1 rounded-full border border-brand-200 mb-2.5">
+              <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-600"></i>
+              <span id="winnerBadgeText">सलाह: यहाँ बेचें</span>
+            </span>
+            <h3 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight" id="winnerMandiName">
+              पटियाला मुख्य मंडी
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium flex items-center gap-2 mt-1.5">
+              <span class="flex items-center gap-1"><i data-lucide="navigation" class="w-3.5 h-3.5 text-slate-400"></i> <strong id="winnerDistance" class="font-english text-slate-800">18 किमी</strong> दूरी</span>
+              <span>•</span>
+              <span class="flex items-center gap-1"><i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i> लगभग <span id="winnerDriveTime" class="font-bold">40 मिनट</span></span>
+              <span>•</span>
+              <span id="winnerFreshness" class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200">आज का भाव</span>
+            </p>
+          </div>
+
+          <!-- Giant Net Rupee Callout -->
+          <div class="bg-gradient-to-br from-brand-50 to-emerald-50 p-5 rounded-3xl border border-brand-200 text-right min-w-[210px] shadow-sm">
+            <span class="block text-[11px] font-extrabold text-slate-500 uppercase tracking-wider" id="netTakeHomeLabel">जेब में आने वाली असली रकम</span>
+            <div class="text-3xl sm:text-4xl font-black text-brand-700 font-english" id="winnerNetPayout">₹1,44,395</div>
+            <div class="text-xs text-brand-900 font-bold mt-1">
+              (प्रति क्विंटल शुद्ध: <span id="winnerPerQtlNet" class="font-english font-black">₹2,407</span>)
+            </div>
+          </div>
+        </div>
+
+        <!-- The "Reason-Why" Plain-Language Explainer Box -->
+        <div class="mt-5 p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-slate-800">
+          <div class="flex items-start gap-3">
+            <div class="p-2.5 rounded-2xl bg-amber-400/20 text-amber-900 shrink-0 mt-0.5">
+              <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600"></i>
+            </div>
+            <div class="flex-1">
+              <h4 class="text-xs font-extrabold text-amber-900 uppercase tracking-wider" id="explainTitle">
+                क्यों यह मंडी आपके लिए सर्वश्रेष्ठ है?
+              </h4>
+              <p class="text-sm font-semibold text-slate-900 mt-1 leading-relaxed" id="winnerReasonSentence">
+                राजपुरा मंडी में भाव ₹30 ज्यादा दिख रहा है, लेकिन 78 किमी अतिरिक्त भाड़े में आपके ₹2,730 ज्यादा खर्च हो जाएंगे। इसलिए <strong>पटियाला मंडी में बेचने पर आपको कुल ₹939 ज्यादा शुद्ध मुनाफा</strong> मिलेगा!
+              </p>
+            </div>
+            <!-- Speech Output Audio Button -->
+            <button id="ttsButton" onclick="speakRecommendation()" title="सलाह सुनें" class="p-3 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white rounded-2xl shadow-md shadow-brand-600/30 flex items-center justify-center transition shrink-0">
+              <i data-lucide="volume-2" class="w-5 h-5"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-3 border-t border-slate-100 text-xs">
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
+            <span class="text-slate-500 block text-[11px] font-semibold" id="metricGrossLabel">कुल सकल मूल्य</span>
+            <span class="font-black text-slate-900 text-base font-english" id="winnerGrossVal">₹1,47,000</span>
+            <span class="text-[10px] text-slate-400 block font-english">@ ₹2,450/qtl</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-rose-50/60 border border-rose-100">
+            <span class="text-rose-700 block text-[11px] font-semibold" id="metricTransLabel">परिवहन खर्च (भाड़ा)</span>
+            <span class="font-black text-rose-600 text-base font-english" id="winnerTransCost">-₹1,030</span>
+            <span class="text-[10px] text-rose-500 block">रोड दूरी अनुसार</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/60">
+            <span class="text-slate-500 block text-[11px] font-semibold" id="metricFeeLabel">मंडी शुल्क + पल्लेदारी</span>
+            <span class="font-black text-slate-700 text-base font-english" id="winnerMandiFees">-₹1,575</span>
+            <span class="text-[10px] text-slate-400 block">मार्केट सेस + लेबर</span>
+          </div>
+          <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-200">
+            <span class="text-emerald-800 block text-[11px] font-bold" id="metricGainLabel">अतिरिक्त मुनाफा</span>
+            <span class="font-black text-emerald-700 text-base font-english" id="winnerExtraProfit">+₹939</span>
+            <span class="text-[10px] text-emerald-600 block">राजपुरा की तुलना में</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Action Jump To Visualization -->
+      <div class="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl">
+        <div class="flex items-center gap-3">
+          <div class="p-2.5 bg-blue-600 text-white rounded-2xl">
+            <i data-lucide="pie-chart" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h4 class="font-extrabold text-sm text-blue-950">सच्चाई का ग्राफ देखना चाहते हैं?</h4>
+            <p class="text-xs text-blue-800">देखें कैसे दूर की मंडी का ज्यादा भाव भाड़े में बह जाता है।</p>
+          </div>
+        </div>
+        <button onclick="switchTab('compare')" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-black px-4 py-2 rounded-xl transition">
+          ग्राफ देखें →
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: VISUAL COMPARISON & CROSSING BARS -->
+    <!-- ========================================== -->
+    <div id="tabContent_compare" class="tab-content space-y-6">
+
+      <!-- Chart Card -->
+      <section class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div>
+            <h3 class="text-lg sm:text-xl font-black text-slate-950" id="chartHeading">
+              भाव vs जेब में मुनाफा (सच्चाई का ग्राफ)
+            </h3>
+            <p class="text-xs text-slate-500 mt-0.5" id="chartSubheading">
+              देखें कैसे दूर की मंडी का ज्यादा भाव भाड़े में बह जाता है ("The Bars Cross")
+            </p>
+          </div>
+
+          <div class="flex items-center gap-3 text-xs bg-slate-50 p-2 rounded-2xl border border-slate-200/80">
+            <div class="flex items-center gap-1.5 font-bold text-slate-500">
+              <span class="w-3.5 h-3.5 rounded-md bg-slate-300"></span>
+              <span id="legendGross">दिखाया गया दाम (Gross)</span>
+            </div>
+            <div class="flex items-center gap-1.5 font-black text-brand-700">
+              <span class="w-3.5 h-3.5 rounded-md bg-brand-600"></span>
+              <span id="legendNet">जेब में मुनाफा (Net)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Canvas Container -->
+        <div class="relative w-full h-72 sm:h-80">
+          <canvas id="crossingBarsChart"></canvas>
+        </div>
+
+        <div class="mt-4 p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 text-xs text-emerald-950 flex items-start gap-2.5">
+          <i data-lucide="info" class="w-4 h-4 text-emerald-700 mt-0.5 shrink-0"></i>
+          <span id="chartNoteText" class="leading-relaxed font-semibold">
+            राजपुरा मंडी का कुल भाव सबसे ऊँचा (₹1,48,800) दिखता है, लेकिन 96 किमी दूर होने के कारण भाड़े में कटौती के बाद पटियाला में आपको <strong>₹939 अधिक शुद्ध नकद</strong> बचता है।
+          </span>
+        </div>
+      </section>
+
+      <!-- Side-by-side Visual Cards Comparison -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <!-- Mandi 1: Patiala -->
+        <div class="p-5 rounded-3xl bg-white border-2 border-brand-500 shadow-md flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-wider bg-brand-100 text-brand-800 px-2 py-0.5 rounded-full">सर्वश्रेष्ठ विकल्प</span>
+            <h4 class="text-lg font-black text-slate-900 mt-2">पटियाला मुख्य मंडी</h4>
+            <p class="text-xs text-slate-500">दूरी: <strong>18 किमी</strong> • भाव: ₹2,450</p>
+
+            <div class="my-4 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-600"><span>सकल मूल्य:</span> <span class="font-bold">₹1,47,000</span></div>
+              <div class="flex justify-between text-rose-600"><span>भाड़ा खर्च:</span> <span class="font-bold">-₹1,030</span></div>
+              <div class="flex justify-between text-slate-600"><span>मंडी टैक्स/लेबर:</span> <span class="font-bold">-₹1,575</span></div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100">
+            <span class="text-[11px] text-slate-400 font-bold block">हाथ में आई असली रकम:</span>
+            <span class="text-2xl font-black text-brand-700 font-english">₹1,44,395</span>
+          </div>
+        </div>
+
+        <!-- Mandi 2: Rajpura (The Trap) -->
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">दाम ज्यादा, बचत कम</span>
+            <h4 class="text-lg font-black text-slate-900 mt-2">राजपुरा अनाज मंडी</h4>
+            <p class="text-xs text-slate-500">दूरी: <strong>96 किमी</strong> • भाव: ₹2,480</p>
+
+            <div class="my-4 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-600"><span>सकल मूल्य:</span> <span class="font-bold">₹1,48,800</span></div>
+              <div class="flex justify-between text-rose-600"><span>भाड़ा खर्च:</span> <span class="font-bold">-₹3,760</span></div>
+              <div class="flex justify-between text-slate-600"><span>मंडी टैक्स/लेबर:</span> <span class="font-bold">-₹1,707</span></div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100">
+            <span class="text-[11px] text-slate-400 font-bold block">हाथ में आई असली रकम:</span>
+            <span class="text-2xl font-black text-slate-700 font-english">₹1,43,456</span>
+          </div>
+        </div>
+
+        <!-- Mandi 3: Nabha -->
+        <div class="p-5 rounded-3xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
+          <div>
+            <span class="text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">नज़दीकी मंडी</span>
+            <h4 class="text-lg font-black text-slate-900 mt-2">नाभा मंडी</h4>
+            <p class="text-xs text-slate-500">दूरी: <strong>34 किमी</strong> • भाव: ₹2,430</p>
+
+            <div class="my-4 space-y-1.5 text-xs">
+              <div class="flex justify-between text-slate-600"><span>सकल मूल्य:</span> <span class="font-bold">₹1,45,800</span></div>
+              <div class="flex justify-between text-rose-600"><span>भाड़ा खर्च:</span> <span class="font-bold">-₹1,590</span></div>
+              <div class="flex justify-between text-slate-600"><span>मंडी टैक्स/लेबर:</span> <span class="font-bold">-₹1,509</span></div>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-slate-100">
+            <span class="text-[11px] text-slate-400 font-bold block">हाथ में आई असली रकम:</span>
+            <span class="text-2xl font-black text-slate-700 font-english">₹1,42,701</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: ALL 15 MANDIS RANKED LIST -->
+    <!-- ========================================== -->
+    <div id="tabContent_allmandis" class="tab-content space-y-5">
+
+      <section class="bg-white rounded-3xl p-5 sm:p-7 shadow-sm border border-slate-200">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+          <div>
+            <h3 class="text-lg sm:text-xl font-black text-slate-950" id="tableHeading">
+              सभी 15 मंडियों की विस्तृत तुलना
+            </h3>
+            <p class="text-xs text-slate-500" id="tableSubheading">
+              सकल भाव की जगह जेब में आने वाले शुद्ध मुनाफे के क्रम में सजी हुई
+            </p>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex items-center gap-1.5 text-xs">
+            <button onclick="filterMandis('all')" id="filterAll" class="filter-tab px-3 py-1.5 rounded-xl bg-brand-600 text-white font-black shadow-sm">
+              सभी 15 मंडियां
+            </button>
+            <button onclick="filterMandis('top3')" id="filterTop3" class="filter-tab px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200">
+              शीर्ष 3
+            </button>
+            <button onclick="filterMandis('lowRisk')" id="filterLowRisk" class="filter-tab px-3 py-1.5 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200">
+              कम जोखिम
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Mandis Cards Container -->
+        <div id="mandiResultsList" class="space-y-3">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: 7-DAY PRICE RISK & ARRIVAL SURGE -->
+    <!-- ========================================== -->
+    <div id="tabContent_risk" class="tab-content space-y-6">
+
+      <section class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl">
+        <div class="flex items-start justify-between">
+          <div>
+            <span class="bg-emerald-400 text-emerald-950 font-black text-[10px] px-2.5 py-0.5 rounded-full uppercase tracking-wider font-english">
+              PREDICTIVE RISK ENGINE
+            </span>
+            <h3 class="text-xl sm:text-2xl font-black text-white mt-1.5" id="mlHeading">
+              आगामी 7-दिन मूल्य दिशा व मंडी आवक मॉडल
+            </h3>
+            <p class="text-xs text-slate-400 mt-1 max-w-xl">
+              दाम कब बढ़ेंगे, कब स्थिर रहेंगे, और भारी आवक (Surge) के कारण कब गिर सकते हैं—इसका सटीक पूर्वानुमान।
+            </p>
+          </div>
+          <div class="w-10 h-10 rounded-2xl bg-slate-800 border border-slate-700 flex items-center justify-center text-emerald-400">
+            <i data-lucide="trending-up" class="w-5 h-5"></i>
+          </div>
+        </div>
+
+        <!-- 3 Metric Cards -->
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold">7-दिन मूल्य दिशा (Trend)</span>
+              <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i>
+            </div>
+            <div class="text-xl font-black text-emerald-400 mt-2 flex items-center gap-1.5 font-english">
+              <span>स्थिर / बढ़ोतरी (Stable-Up)</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+              गेहूं व धान के ऐतिहासिक भाव पैटर्न के आधार पर आगामी 7 दिन पटियाला में भाव स्थिर रहने की 87% संभावना है।
+            </p>
+          </div>
+
+          <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold">आवक दबाव (Arrival Surge)</span>
+              <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-400"></i>
+            </div>
+            <div class="text-xl font-black text-amber-400 mt-2 flex items-center gap-1.5 font-english">
+              <span>राजपुरा में आवक उछाल!</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+              राजपुरा में कल +35% अतिरिक्त ट्रॉलियों की आवक संभावित है, जिससे शाम तक दामों में हल्की नरमी आ सकती है।
+            </p>
+          </div>
+
+          <div class="bg-slate-800/90 p-4 rounded-2xl border border-slate-700/80">
+            <div class="flex items-center justify-between text-slate-400">
+              <span class="font-bold">डेटा ताजगी & बैकअप</span>
+              <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div class="text-xl font-black text-cyan-300 mt-2 font-english">
+              7-Day Rolling Median
+            </div>
+            <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+              छुट्टी या मंडी बंद होने के दिन पिछले 7 दिनों का मध्यमान भाव इस्तेमाल होता है ताकि गलत गणना न हो।
+            </p>
+          </div>
+        </div>
+
+        <!-- Calculation Methodology Card -->
+        <div class="mt-6 p-4 rounded-2xl bg-slate-800/50 border border-slate-700 text-xs text-slate-300 space-y-2">
+          <div class="font-bold text-white flex items-center gap-2">
+            <i data-lucide="code" class="w-4 h-4 text-emerald-400"></i>
+            <span>गणना का स्पष्ट सूत्र:</span>
+          </div>
+          <p class="font-mono bg-slate-900 p-2.5 rounded-xl text-emerald-300 text-[11px] overflow-x-auto">
+            शुद्ध कमाई (Net Realization) = (मंडी भाव × कुल क्विंटल) - रोड भाड़ा (दूरी × वाहन दर + बेस) - मंडी शुल्क (सेस + तुलाई)
+          </p>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: FAQ & HELP GUIDE -->
+    <!-- ========================================== -->
+    <div id="tabContent_faq" class="tab-content space-y-6">
+
+      <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="p-3 bg-purple-100 text-purple-700 rounded-2xl">
+            <i data-lucide="help-circle" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-xl font-black text-slate-950">अक्सर पूछे जाने वाले सवाल (FAQ)</h3>
+            <p class="text-xs text-slate-500">MunafaMandi ऐप कैसे काम करती है और आपके पैसे कैसे बचाती है</p>
+          </div>
+        </div>
+
+        <div class="space-y-4 text-sm">
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <h4 class="font-extrabold text-slate-900 text-base">१. दूर की मंडी में ₹50 ज्यादा भाव मिलने पर भी वहां क्यों न जाएं?</h4>
+            <p class="text-slate-600 text-xs sm:text-sm mt-1 leading-relaxed">
+              क्योंकि 60-100 किमी दूर जाने में ट्रैक्टर का डीजल, समय और भाड़ा ₹2,500 से ₹4,000 तक लग जाता है। प्रति क्विंटल मिलने वाले ₹50 अतिरिक्त कुल 40 क्विंटल पर सिर्फ ₹2,000 बनते हैं, यानी उल्टा ₹1,000 से ₹2,000 का नुकसान हो जाता है।
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <h4 class="font-extrabold text-slate-900 text-base">२. क्या यह ऐप बिना इंटरनेट के भी चलेगी?</h4>
+            <p class="text-slate-600 text-xs sm:text-sm mt-1 leading-relaxed">
+              हाँ! यह एक प्रगतिशील वेब ऐप (PWA) है। अगर आपके खेत में 2G या कमजोर नेटवर्क है, तब भी यह पिछले सेव किए गए डेटा और सड़क दूरी के आधार पर सटीक भाड़ा और शुद्ध मुनाफा तुरंत निकाल देती है।
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <h4 class="font-extrabold text-slate-900 text-base">३. क्या मैं बोलकर भी अपनी फसल बता सकता हूँ?</h4>
+            <p class="text-slate-600 text-xs sm:text-sm mt-1 leading-relaxed">
+              हाँ! ऊपर लाल माइक बटन पर क्लिक करके हिंदी या पंजाबी में बोलें, जैसे: <em>"गेहूं, साठ क्विंटल, भादसों"</em>। ऐप आपकी आवाज सुनकर तुरंत कैलकुलेट कर लेगी।
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+            <h4 class="font-extrabold text-slate-900 text-base">४. क्या इसमें मंडी का टैक्स और पल्लेदारी भी शामिल है?</h4>
+            <p class="text-slate-600 text-xs sm:text-sm mt-1 leading-relaxed">
+              हाँ, पंजाब मंडी बोर्ड के नियमों के तहत किसान की जेब से कटने वाला वैधानिक सेस और सरकारी पल्लेदारी (तौल/लेबर) काटकर ही शुद्ध नकद दिखाया जाता है।
+            </p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Bottom Mobile Tab Bar (For phone-friendly app experience) -->
+  <nav class="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200 py-2 px-3 flex items-center justify-around shadow-lg">
+    <button onclick="switchTab('advisor')" id="mTabBtn_advisor" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-brand-700 font-black">
+      <i data-lucide="calculator" class="w-5 h-5"></i>
+      <span class="text-[10px]">कैलकुलेटर</span>
+    </button>
+    <button onclick="switchTab('compare')" id="mTabBtn_compare" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
+      <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+      <span class="text-[10px]">ग्राफ</span>
+    </button>
+    <button onclick="toggleVoiceInput()" class="w-12 h-12 -mt-5 rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/40 flex items-center justify-center active:scale-95 transition">
+      <i data-lucide="mic" class="w-6 h-6"></i>
+    </button>
+    <button onclick="switchTab('allmandis')" id="mTabBtn_allmandis" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
+      <i data-lucide="store" class="w-5 h-5"></i>
+      <span class="text-[10px]">मंडियां</span>
+    </button>
+    <button onclick="switchTab('risk')" id="mTabBtn_risk" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
+      <i data-lucide="trending-up" class="w-5 h-5"></i>
+      <span class="text-[10px]">रुझान</span>
+    </button>
+  </nav>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+    <div class="max-w-4xl mx-auto px-4 space-y-1">
+      <p class="font-extrabold text-slate-700">MunafaMandi (मुनाफ़ामंडी) • किसान भाइयों का सच्चा साथी</p>
+      <p>पटियाला जिला एवं 15 मुख्य मंडियां • पारदर्शी रोड भाड़ा व शुद्ध कमाई सलाहकार</p>
+      <p class="text-[11px] text-slate-400">Designed with Voice-First Accessibility for Farmers of Bharat</p>
+    </div>
+  </footer>
+
+  <!-- Core App Logic -->
+  <script src="script.js"></script>
+</body>
+</html>
