@@ -128,6 +128,12 @@
           <button id="langEn" onclick="setLanguage('en')" class="px-3 py-1 text-xs font-black rounded-lg transition-all text-slate-600 hover:text-slate-900">EN</button>
         </div>
 
+        <!-- Farmer Registration Header Button -->
+        <button onclick="switchTab('register')" id="headerRegisterBtn" class="flex items-center gap-1.5 bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-700 hover:to-emerald-700 text-white font-extrabold text-xs px-3 py-1.5 rounded-xl shadow-sm transition active:scale-95">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span id="headerRegisterBtnText">किसान पंजीकरण</span>
+        </button>
+
         <!-- Live Server Status Indicator -->
         <div id="onlineBadge" class="flex items-center gap-1.5 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1.5 rounded-xl">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -157,6 +163,11 @@
         <button onclick="switchTab('risk')" id="tabBtn_risk" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
           <i data-lucide="trending-up" class="w-4 h-4 text-amber-500"></i>
           <span id="tabLabelRisk">7-दिन रुझान & आवक</span>
+        </button>
+
+        <button onclick="switchTab('register')" id="tabBtn_register" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-600"></i>
+          <span id="tabLabelRegister">किसान प्रोफ़ाइल</span>
         </button>
 
         <button onclick="switchTab('faq')" id="tabBtn_faq" class="app-tab-btn flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-slate-100 hover:text-slate-900">
@@ -701,6 +712,206 @@
 
     </div>
 
+    <!-- ========================================== -->
+    <!-- TAB 6: FARMER REGISTRATION (किसान पंजीकरण) -->
+    <!-- ========================================== -->
+    <div id="tabContent_register" class="tab-content space-y-6">
+
+      <section class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        <!-- Top banner icon and title -->
+        <div class="flex items-center gap-3.5 mb-6">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-500 text-white flex items-center justify-center shadow-md shadow-brand-600/25">
+            <i data-lucide="user-check" class="w-6 h-6 stroke-[2.5]"></i>
+          </div>
+          <div>
+            <h3 class="text-xl sm:text-2xl font-black text-slate-950" id="regTitle">
+              किसान पंजीकरण व डिजिटल प्रोफाइल
+            </h3>
+            <p class="text-xs sm:text-sm text-slate-500 font-medium" id="regSubtitle">
+              अपनी जानकारी एक बार सहेजें — मंडी भाव, भाड़ा और शुद्ध मुनाफे की व्यक्तिगत सलाह तुरंत पाएं
+            </p>
+          </div>
+        </div>
+
+        <!-- Registration Success Notification (Hidden initially) -->
+        <div id="regSuccessAlert" class="hidden mb-6 p-4 bg-emerald-50 border-2 border-emerald-500 rounded-2xl text-emerald-950 flex items-start gap-3 shadow-sm animate-pulse">
+          <div class="p-2 bg-emerald-500 text-white rounded-xl shrink-0 mt-0.5">
+            <i data-lucide="check" class="w-5 h-5"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="font-black text-sm" id="regSuccessTitle">पंजीकरण सफलतापूर्वक पूर्ण हुआ!</h4>
+            <p class="text-xs text-emerald-800 mt-0.5" id="regSuccessMsg">
+              आपकी जानकारी सहेज ली गई है। कैलकुलेटर अब आपके गांव और वाहन अनुसार स्वतः हिसाब लगाएगा।
+            </p>
+          </div>
+        </div>
+
+        <!-- Registration Form -->
+        <form id="farmerRegForm" onsubmit="handleFarmerRegistration(event)" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Farmer Full Name -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelName">
+                किसान का पूरा नाम *
+              </label>
+              <div class="relative">
+                <input type="text" id="regFarmerName" required placeholder="जैसे: रमेश कुमार / ਗੁਰਪ੍ਰੀਤ ਸਿੰਘ" class="w-full h-12 pl-10 pr-4 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white" />
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="user" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mobile Number -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelPhone">
+                मोबाइल नंबर (मंडी SMS अपडेट्स हेतु) *
+              </label>
+              <div class="relative">
+                <input type="tel" id="regFarmerPhone" required pattern="[0-9]{10}" placeholder="१० अंकों का मोबाइल नंबर" class="w-full h-12 pl-10 pr-4 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white font-english" />
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="phone" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Home Village / Tehsil -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelVillage">
+                स्थाई गांव / कस्बा (पटियाला) *
+              </label>
+              <div class="relative">
+                <select id="regFarmerVillage" required class="w-full h-12 pl-10 pr-9 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white appearance-none">
+                  <option value="Bhadson">भादसों (Bhadson)</option>
+                  <option value="Patiala Rural">पटियाला देहात (Patiala Rural)</option>
+                  <option value="Nabha Rural">नाभा देहात (Nabha Rural)</option>
+                  <option value="Samana">समाना (Samana)</option>
+                  <option value="Rajpura Rural">राजपुरा देहात (Rajpura Rural)</option>
+                  <option value="Sanaur">सनौर (Sanaur)</option>
+                  <option value="Ghanour">घनौर (Ghanour)</option>
+                  <option value="Patran">पातरां (Patran)</option>
+                </select>
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="map-pin" class="w-5 h-5"></i>
+                </div>
+                <div class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
+                  <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Land Size / Category -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelLand">
+                खेती का रकबा (एकड़ में)
+              </label>
+              <div class="relative">
+                <select id="regFarmerLand" class="w-full h-12 pl-10 pr-9 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white appearance-none">
+                  <option value="small">छोटा किसान (१ - २.५ एकड़)</option>
+                  <option value="marginal">सीमांत किसान (२.५ - ५ एकड़)</option>
+                  <option value="medium">मध्यम किसान (५ - १० एकड़)</option>
+                  <option value="large">बड़ा किसान (१०+ एकड़)</option>
+                </select>
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="layers" class="w-5 h-5"></i>
+                </div>
+                <div class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
+                  <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Primary Crop Produced -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelCrop">
+                मुख्य फसल
+              </label>
+              <div class="relative">
+                <select id="regFarmerCrop" class="w-full h-12 pl-10 pr-9 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white appearance-none">
+                  <option value="wheat">🌾 गेहूं (Wheat)</option>
+                  <option value="paddy">🌾 धान / जीरी (Paddy)</option>
+                  <option value="potato">🥔 आलू (Potato)</option>
+                </select>
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="sprout" class="w-5 h-5"></i>
+                </div>
+                <div class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
+                  <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Preferred Transport Vehicle -->
+            <div>
+              <label class="block text-xs font-black text-slate-700 uppercase tracking-wider mb-1.5" id="regLabelVehicle">
+                स्वामित्व / पसंदीदा वाहन
+              </label>
+              <div class="relative">
+                <select id="regFarmerVehicle" class="w-full h-12 pl-10 pr-9 rounded-2xl border-2 border-slate-200 font-bold text-slate-900 text-sm focus:border-brand-500 focus:outline-none transition bg-slate-50/50 focus:bg-white appearance-none">
+                  <option value="tractor">🚜 अपना / किराए का ट्रैक्टर ट्रॉली</option>
+                  <option value="pickup">🛻 छोटा हाथी / पिकअप</option>
+                  <option value="truck">🚛 बड़ा ट्रक (किराया)</option>
+                </select>
+                <div class="absolute left-3.5 top-3.5 text-slate-400">
+                  <i data-lucide="truck" class="w-5 h-5"></i>
+                </div>
+                <div class="absolute right-3.5 top-3.5 text-slate-400 pointer-events-none">
+                  <i data-lucide="chevron-down" class="w-5 h-5"></i>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Benefits Checklist -->
+          <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs text-emerald-950 space-y-1.5">
+            <div class="font-black text-sm flex items-center gap-1.5 text-emerald-900">
+              <i data-lucide="shield-check" class="w-4 h-4 text-emerald-700"></i>
+              <span id="regPerksTitle">पंजीकृत किसान के फायदे:</span>
+            </div>
+            <ul class="space-y-1 text-emerald-800 font-medium pl-5 list-disc">
+              <li>आपके गांव से सभी 15 मंडियों का रोड भाड़ा स्वतः कैलकुलेटर में प्री-सेट रहेगा।</li>
+              <li>अराइवल उछाल (Supply Surge) होने पर मोबाइल पर समय पूर्व चेतावनी।</li>
+              <li>बिना किसी लॉगिन या पासवर्ड के 100% ऑफ़लाइन सुरक्षित।</li>
+            </ul>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="flex flex-col sm:flex-row items-center gap-3 pt-2">
+            <button type="submit" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-700 active:scale-95 text-white font-black text-sm px-8 py-3.5 rounded-2xl shadow-lg shadow-brand-600/30 flex items-center justify-center gap-2 transition">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+              <span id="regSubmitBtn">किसान पंजीकरण पूर्ण करें</span>
+            </button>
+            <button type="button" onclick="loadSavedFarmerProfile()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-5 py-3.5 rounded-2xl transition flex items-center justify-center gap-1.5">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>सेव प्रोफाइल लोड करें</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Saved Profile Card (if exists) -->
+        <div id="savedProfileCard" class="hidden mt-6 p-5 rounded-3xl bg-slate-50 border-2 border-brand-200">
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-black text-sm font-english">
+                ✓
+              </div>
+              <div>
+                <h4 class="font-black text-slate-900 text-sm" id="cardFarmerName">रमेश कुमार</h4>
+                <p class="text-xs text-slate-500" id="cardFarmerDetails">भादसों • 🚜 ट्रैक्टर ट्रॉली • 🌾 गेहूं</p>
+              </div>
+            </div>
+            <button onclick="applyProfileToCalculator()" class="bg-brand-600 hover:bg-brand-700 text-white font-black text-xs px-3.5 py-1.5 rounded-xl shadow transition">
+              कैलकुलेटर में लगाएं →
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
   </main>
 
   <!-- Bottom Mobile Tab Bar (For phone-friendly app experience) -->
@@ -716,13 +927,13 @@
     <button onclick="toggleVoiceInput()" class="w-12 h-12 -mt-5 rounded-full bg-rose-600 text-white shadow-lg shadow-rose-600/40 flex items-center justify-center active:scale-95 transition">
       <i data-lucide="mic" class="w-6 h-6"></i>
     </button>
+    <button onclick="switchTab('register')" id="mTabBtn_register" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
+      <i data-lucide="user-check" class="w-5 h-5"></i>
+      <span class="text-[10px]">प्रोफ़ाइल</span>
+    </button>
     <button onclick="switchTab('allmandis')" id="mTabBtn_allmandis" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
       <i data-lucide="store" class="w-5 h-5"></i>
       <span class="text-[10px]">मंडियां</span>
-    </button>
-    <button onclick="switchTab('risk')" id="mTabBtn_risk" class="mobile-tab-btn flex flex-col items-center gap-0.5 text-slate-500 font-bold">
-      <i data-lucide="trending-up" class="w-5 h-5"></i>
-      <span class="text-[10px]">रुझान</span>
     </button>
   </nav>
 

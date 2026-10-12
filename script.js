@@ -21,7 +21,9 @@ const TRANSLATIONS = {
     tabCompare: "भाव vs शुद्ध कमाई ग्राफ",
     tabAllMandis: "सभी 15 मंडियां",
     tabRisk: "7-दिन रुझान & आवक",
+    tabRegister: "किसान प्रोफ़ाइल",
     tabFAQ: "मदद व जानकारी",
+    headerRegBtn: "किसान पंजीकरण",
     bannerHeroTitle: "दिखाया गया दाम सिर्फ भाव है, असल कमाई वह है जो जेब में बचे!",
     bannerHeroDesc: "दूर की मंडी में ₹30-40 ज्यादा दिखे तो भी मत जाइए! पहले रोड का भाड़ा और मंडी खर्च घटाकर शुद्ध मुनाफा चेक कीजिए।",
     bannerBadgeText: "किसान भाइयों का फायदा",
@@ -80,7 +82,9 @@ const TRANSLATIONS = {
     tabCompare: "ਭਾਅ ਬਨਾਮ ਅਸਲੀ ਕਮਾਈ ਗ੍ਰਾਫ਼",
     tabAllMandis: "ਸਾਰੀਆਂ 15 ਮੰਡੀਆਂ",
     tabRisk: "7-ਦਿਨ ਰੁਝਾਨ ਅਤੇ ਆਮਦ",
+    tabRegister: "ਕਿਸਾਨ ਪ੍ਰੋਫਾਈਲ",
     tabFAQ: "ਮਦਦ ਅਤੇ ਜਾਣਕਾਰੀ",
+    headerRegBtn: "ਕਿਸਾਨ ਰਜਿਸਟ੍ਰੇਸ਼ਨ",
     bannerHeroTitle: "ਦਿਖਾਇਆ ਗਿਆ ਭਾਅ ਸਿਰਫ਼ ਲਿਸਟ ਹੈ, ਅਸਲ ਕਮਾਈ ਉਹ ਹੈ ਜੋ ਜੇਬ ਵਿੱਚ ਬਚੇ!",
     bannerHeroDesc: "ਦੂਰ ਦੀ ਮੰਡੀ ਵਿੱਚ ₹30-40 ਵੱਧ ਦਿਖੇ ਤਾਂ ਵੀ ਨਾ ਜਾਓ! ਪਹਿਲਾਂ ਟਰਾਲੀ ਦਾ ਭਾੜਾ ਅਤੇ ਮੰਡੀ ਖ਼ਰਚਾ ਘਟਾ ਕੇ ਸ਼ੁੱਧ ਮੁਨਾਫ਼ਾ ਦੇਖੋ।",
     bannerBadgeText: "ਕਿਸਾਨ ਵੀਰਾਂ ਦਾ ਫ਼ਾਇਦਾ",
@@ -139,7 +143,9 @@ const TRANSLATIONS = {
     tabCompare: "Price vs Profit Chart",
     tabAllMandis: "All 15 Mandis",
     tabRisk: "7-Day Risk & Arrivals",
+    tabRegister: "Farmer Profile",
     tabFAQ: "Help & FAQ",
+    headerRegBtn: "Register as Farmer",
     bannerHeroTitle: "The listed price is just a number; what matters is what stays in your pocket!",
     bannerHeroDesc: "Don't drive to a far mandi for ₹30-40 higher price! Subtract tractor freight and mandi charges first to see actual take-home cash.",
     bannerBadgeText: "Farmer First Advantage",
@@ -832,10 +838,12 @@ window.setLanguage = function(lang) {
 
   // Header & Tab labels
   updateText('headerTagline', t.tagline);
+  updateText('headerRegisterBtnText', t.headerRegBtn);
   updateText('tabLabelAdvisor', t.tabAdvisor);
   updateText('tabLabelCompare', t.tabCompare);
   updateText('tabLabelAllMandis', t.tabAllMandis);
   updateText('tabLabelRisk', t.tabRisk);
+  updateText('tabLabelRegister', t.tabRegister);
   updateText('tabLabelFAQ', t.tabFAQ);
 
   // Hero Banner
@@ -994,8 +1002,129 @@ window.speakRecommendation = function() {
   window.speechSynthesis.speak(utterance);
 };
 
+// =====================================
+// FARMER REGISTRATION & PROFILE STORAGE
+// =====================================
+window.handleFarmerRegistration = function(e) {
+  e.preventDefault();
+  const name = document.getElementById('regFarmerName')?.value.trim();
+  const phone = document.getElementById('regFarmerPhone')?.value.trim();
+  const village = document.getElementById('regFarmerVillage')?.value;
+  const land = document.getElementById('regFarmerLand')?.value;
+  const crop = document.getElementById('regFarmerCrop')?.value;
+  const vehicle = document.getElementById('regFarmerVehicle')?.value;
+
+  const farmerProfile = {
+    name,
+    phone,
+    village,
+    land,
+    crop,
+    vehicle,
+    registeredAt: new Date().toISOString()
+  };
+
+  try {
+    localStorage.setItem('munafamandi_farmer_profile', JSON.stringify(farmerProfile));
+  } catch (err) {
+    console.warn("Storage err:", err);
+  }
+
+  // Display success alert
+  const alertEl = document.getElementById('regSuccessAlert');
+  if (alertEl) {
+    alertEl.classList.remove('hidden');
+    setTimeout(() => {
+      alertEl.classList.add('hidden');
+    }, 4500);
+  }
+
+  // Update profile card
+  displaySavedProfileCard(farmerProfile);
+
+  // Auto-apply preferences to the calculator
+  applyProfileToCalculator(false);
+};
+
+function displaySavedProfileCard(profile) {
+  const card = document.getElementById('savedProfileCard');
+  if (!card) return;
+  card.classList.remove('hidden');
+
+  const nameEl = document.getElementById('cardFarmerName');
+  if (nameEl) nameEl.textContent = profile.name + ` (${profile.phone || ''})`;
+
+  const detailsEl = document.getElementById('cardFarmerDetails');
+  if (detailsEl) {
+    const cropLabel = profile.crop === 'wheat' ? '🌾 गेहूं' : (profile.crop === 'paddy' ? '🌾 धान' : '🥔 आलू');
+    const vehLabel = profile.vehicle === 'tractor' ? '🚜 ट्रैक्टर ट्रॉली' : (profile.vehicle === 'pickup' ? '🛻 पिकअप' : '🚛 ट्रक');
+    detailsEl.textContent = `${profile.village} • ${vehLabel} • ${cropLabel}`;
+  }
+}
+
+window.loadSavedFarmerProfile = function() {
+  try {
+    const data = localStorage.getItem('munafamandi_farmer_profile');
+    if (data) {
+      const profile = JSON.parse(data);
+      if (document.getElementById('regFarmerName')) document.getElementById('regFarmerName').value = profile.name || '';
+      if (document.getElementById('regFarmerPhone')) document.getElementById('regFarmerPhone').value = profile.phone || '';
+      if (document.getElementById('regFarmerVillage')) document.getElementById('regFarmerVillage').value = profile.village || 'Bhadson';
+      if (document.getElementById('regFarmerLand')) document.getElementById('regFarmerLand').value = profile.land || 'small';
+      if (document.getElementById('regFarmerCrop')) document.getElementById('regFarmerCrop').value = profile.crop || 'wheat';
+      if (document.getElementById('regFarmerVehicle')) document.getElementById('regFarmerVehicle').value = profile.vehicle || 'tractor';
+
+      displaySavedProfileCard(profile);
+      alert(currentLang === 'pa' ? 'ਸੇਵ ਕੀਤੀ ਪ੍ਰੋਫਾਈਲ ਲੋਡ ਹੋ ਗਈ!' : (currentLang === 'en' ? 'Saved profile loaded!' : 'सेव की गई प्रोफाइल लोड हो गई!'));
+    } else {
+      alert(currentLang === 'pa' ? 'ਕੋਈ ਸੇਵ ਪ੍ਰੋਫਾਈਲ ਨਹੀਂ ਮਿਲੀ। ਕਿਰਪਾ ਕਰਕੇ ਪਹਿਲਾਂ ਰਜਿਸਟਰ ਕਰੋ।' : (currentLang === 'en' ? 'No saved profile found. Please register first.' : 'कोई सेव प्रोफाइल नहीं मिली। कृपया पहले पंजीकरण करें।'));
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+};
+
+window.applyProfileToCalculator = function(jumpToTab = true) {
+  try {
+    const data = localStorage.getItem('munafamandi_farmer_profile');
+    if (data) {
+      const profile = JSON.parse(data);
+      if (profile.crop) selectCrop(profile.crop);
+      if (profile.village && document.getElementById('villageSelect')) {
+        document.getElementById('villageSelect').value = profile.village;
+      }
+      if (profile.vehicle && document.getElementById('vehicleType')) {
+        document.getElementById('vehicleType').value = profile.vehicle;
+      }
+      calculateRealization();
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+
+  if (jumpToTab) {
+    switchTab('advisor');
+  }
+};
+
+// Check for existing profile on startup
+function checkExistingProfileOnLoad() {
+  try {
+    const data = localStorage.getItem('munafamandi_farmer_profile');
+    if (data) {
+      const profile = JSON.parse(data);
+      displaySavedProfileCard(profile);
+      const btn = document.getElementById('headerRegisterBtnText');
+      if (btn) btn.textContent = profile.name ? `किसान: ${profile.name.split(' ')[0]}` : 'किसान प्रोफ़ाइल';
+    }
+  } catch (err) {
+    console.warn(err);
+  }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   if (window.lucide) lucide.createIcons();
+  checkExistingProfileOnLoad();
   calculateRealization();
 });
